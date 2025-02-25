@@ -1,0 +1,7 @@
+plt.figure(figsize=(8, 6))
+plt.contourf(theta_vals, p_vals, wigner_vals.T, levels=100, cmap='RdBu')
+plt.colorbar(label='Wigner function')
+plt.xlabel(r'$\theta$')
+plt.ylabel(r'$p$')
+plt.title('Wigner')
+plt.show()
