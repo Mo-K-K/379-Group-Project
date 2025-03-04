@@ -8,7 +8,7 @@ hbar = 1#1.05*10**(-34)
 I=1 #ang mom
 
 def psi(n, theta):
-    '''initialise the wave function, this is just a test wave function not the actual one'''
+    '''initialise the wave function, this is just a test wave function not the actual one '''
     norm = 1/np.sqrt(2**n * math.factorial(n) * np.sqrt(np.pi))
     return norm * np.exp(-theta**2 /2)*eval_hermite(n, theta) #approx wave function using hermite functions
 
