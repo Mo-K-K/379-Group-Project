@@ -4,14 +4,14 @@ import matplotlib.animation as animation
 from math import *
 from matplotlib.animation import FFMpegWriter
 
-d = 4 # dist. between 
+d = 3 # dist. between 
 L = 1 # Assuming L is the length of rod of each pendulum
 k = 1 # 4πɛ₀ (divides Q Q)
 g = 10 # grav const. NOTE: is g positive or negative?
-m = np.array([1,1,2]) # masses
-Q = 1*np.array([1,0,1]) # charges
-theta = np.array([pi/2,0,-pi/2]) # angles (θᵢ)
-omega = np.array([0,0,0]) # angular (ωᵢ)
+m = np.array([2,1,2]) # masses
+Q = 1*np.array([1,6,100]) # charges
+theta = np.array([pi/2,pi/4,-pi/2]) # angles (θᵢ)
+omega = np.array([0,4,0]) # angular (ωᵢ)
 dt = 0.001 # time step
 t = 0 # initial time - editing this does not "skip" time
 T = 10 # end time (T/FPS)
@@ -28,6 +28,9 @@ C = -d*np.array([[ 0,  1,  2], # NOTE: MAKE SURE TO CHECK THAT WE HAVE THE CORRE
 xn = theta # translating for ease of use in code
 yn = omega # ^^ NOTE: Ben is stinky
 
+global erc
+erc = 0
+
 # RK4 setup 
 fa = lambda y: y
 def fb(xn, yn, t, dt=dt, Q=Q, L=L, g=g):
@@ -41,14 +44,19 @@ def fb(xn, yn, t, dt=dt, Q=Q, L=L, g=g):
                 '''EULER-LAGRANGE EQUATION OF MOTION'''
                 d2theta[i] += 2*L*( L - L*cos(xn[i]-xn[j]) + C[i,j]*( sin(xn[j]) - sin(xn[i]) + C[i,j]/2*L ) ) # Step 1
                 
-                # ANTI EXPLOSION LINES
-                d2theta[i] = 0 if isinf(d2theta[i]) else d2theta[i] # NOTE: removes inf errors but assumes that Q = 0
                 if d2theta[i] <= 0:   # accounts for floating point errors where d2theta = -0
-                    # d2theta[i] = 0
-                    d2theta = abs(d2theta)
-
+                    d2theta[i] = 1e-60 
+                    
+                #     global erc
+                #     erc += 1
+                #     # print(f"Uh oh: {xn, yn, t}")
+                
                 d2theta[i] **= (-3/2) # Step 2
-
+                if isinf(d2theta[i]) or isnan(d2theta[i]): # Error Correction
+                    d2theta[i] = 0
+                    global erc
+                    erc += 1
+    
                 d2theta[i] *= (1/2)*( Q[i]*Q[j]*k ) # Step 3 NOTE: changed -1/2 to 1/2
 
                 d2theta[i] *= 2*L*( L*sin( xn[i] - xn[j] ) - C[i,j]*cos(xn[i]) ) # Step 4
@@ -99,9 +107,9 @@ while t < T - dt:
     xn = normalize_angle(xn)  # Normalize the angle if needed
     M.append([xn, yn, t])  # Store the updated values
 
-
+print("YIPPEEEEEE") if erc == 0 else print(f"!! {erc} errors!!")
 # print([E[0],E[-1]])
-
+# name = input()
 '''RENDERING'''
 ###########################################################################
 
@@ -126,8 +134,11 @@ print("Rendering...")
 fig, ax = plt.subplots()
 
 ax.set_xlim(-1*pi,pi)
-ax.set_xlim(xmin=X.min(),xmax=X.max())
-ax.set_ylim(ymin=Y.min(),ymax=Y.max())
+
+if isinf(Y.max()) or isnan(Y.max()):
+    ax.set_ylim(ymin=-50,ymax=50)
+else:
+    ax.set_ylim(ymin=Y.min(),ymax=Y.max())
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
