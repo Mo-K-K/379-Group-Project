@@ -7,8 +7,8 @@ m = 1.0
 length = 1.0
 g = 9.81
 h_bar = 1.0
-N = 10000
-dt = 0.001
+N = 100000
+dt = 0.0001
 total_time = 10
 
 theta = np.linspace(-np.pi, np.pi, N, endpoint=False)
@@ -19,7 +19,7 @@ V_evol = np.exp(-1j * dt * (-g * m * length * np.cos(theta)) / h_bar)
 A_1, A_2, B_1, B_2 = 1, 1, 1, 1
 k_1, k_2, j_1, j_2 = 1, 1, 1, 1
 
-psi = A_1 * np.cos(k_1*theta) + B_1 * np.cos((2*j_1 - 1)*theta*0.5) + A_2 * np.cos(k_2*theta) + B_2 * np.cos((2*j_2 - 1)*theta*0.5)
+psi = A_1 * np.cos(k_1*theta) + B_1 * np.sin((2*j_1 - 1)*theta*0.5) + A_2 * np.cos(k_2*theta) + B_2 * np.sin((2*j_2 - 1)*theta*0.5)
 
 norm = np.sqrt(np.sum(np.abs(psi) ** 2) * d_theta)
 psi /= norm
