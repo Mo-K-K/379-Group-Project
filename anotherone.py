@@ -59,16 +59,16 @@ def compute_wigner_parallel(m1, m2):
 if __name__ == "__main__":
     
     # Time a single call
-    start_time = time.time()
-    wigner_function_point((1, 1, theta_vals[0], p_vals[0], theta_vals[0], p_vals[0]))
-    end_time = time.time()
+    #start_time = time.time()
+    #wigner_function_point((1, 1, theta_vals[0], p_vals[0], theta_vals[0], p_vals[0]))
+    #end_time = time.time()
 
     # Compute estimated total time
-    time_per_call = end_time - start_time
-    total_calls = N * Np * N * Np  # Total grid points
+    #time_per_call = end_time - start_time
+    #total_calls = N * Np * N * Np  # Total grid points
 
-    estimated_time = time_per_call * total_calls
-    print(f"Estimated run time: {estimated_time / 60:.2f} minutes")
+    #estimated_time = time_per_call * total_calls
+    #print(f"Estimated run time: {estimated_time / 60:.2f} minutes")
     
     # Run computation for m1 = m2 = 1 using parallel processing
     m1, m2 = 1, 1
