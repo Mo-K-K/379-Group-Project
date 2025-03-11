@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from multiprocessing import Pool, cpu_count
+import time
 
 # Constants
 hbar = 1
-N = 10  # Reduced grid size for angles
-Np = 10  # Reduced grid size for momenta
+N = 15  # Reduced grid size for angles
+Np = 15  # Reduced grid size for momenta
 
 # Define angular and momentum grids
 theta_vals = np.linspace(0, 2*np.pi, N, endpoint=False)
@@ -56,6 +57,19 @@ def compute_wigner_parallel(m1, m2):
 
 # Ensure this block runs only in the main script
 if __name__ == "__main__":
+    
+    # Time a single call
+    start_time = time.time()
+    wigner_function_point((1, 1, theta_vals[0], p_vals[0], theta_vals[0], p_vals[0]))
+    end_time = time.time()
+
+    # Compute estimated total time
+    time_per_call = end_time - start_time
+    total_calls = N * Np * N * Np  # Total grid points
+
+    estimated_time = time_per_call * total_calls
+    print(f"Estimated run time: {estimated_time / 60:.2f} minutes")
+    
     # Run computation for m1 = m2 = 1 using parallel processing
     m1, m2 = 1, 1
     wigner_vals = compute_wigner_parallel(m1, m2)
