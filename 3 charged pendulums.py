@@ -20,17 +20,16 @@ frames = int(T/dt)
 print(f"Steps: {frames}")
 FPS = 30
 
-C = lambda i,j: j-i
+# C = lambda i,j: d*(j-i) # technically we should have (j+1) - (i-1), but this cancels down to j-i
 
 fa = lambda y: y
 def fb(theta):
-    A = 0
-    B = 0
     d2theta = np.zeros(3)
-    for i in [0,1,2]:
-        for j in [0,1,2]:
+    for i in range(3):  
+        A = 0
+        for j in range(3):
             if j != i:
-                f = L*( sin(theta[j]) - sin(theta[i])) + C(i+1,j+1)
+                f = L*( sin(theta[j]) - sin(theta[i])) + d*(j-i)
                 df = -L*cos(theta[i])
 
                 g = L*( cos(theta[i]) - cos(theta[j]) )
@@ -41,6 +40,8 @@ def fb(theta):
                 d1r = (-1/2)*( 2*f*df + 2*g*dg )*rn32
 
                 A += k*Q[i]*Q[j]*d1r
+                # _ = j used for debug
+
         B = A - m[i]*g*L*sin(theta[i])
         d2theta[i] = B/(m[i]*(L**2))
     return d2theta
@@ -63,15 +64,13 @@ def RK4(xn,yn,t,dt=dt):
     yN = yn + (dt/6)*(kb1 + 2*kb2 + 2*kb3 + kb4)
     return xN, yN, t+dt
 
-
 def normalize_angle(theta):
     return (theta + np.pi) % (2 * np.pi) - np.pi  # Keeps within (-π, π]
 
 print("Processing...")
 
 # Loop n -> N
-# Initialize with the first set of values
-M = [[theta, omega, t]]
+M = [[theta, omega, t]] 
 while t < T - dt:
     theta, omega, t = RK4(theta, omega, t)  # Use the previous state for the RK4 step
     theta = normalize_angle(theta)  # Normalize the angle if needed
@@ -115,7 +114,7 @@ if isinf(Y.max()) or isnan(Y.max()):
     ax.set_ylim(ymin=-50,ymax=50)
 else:
     ax.set_ylim(ymin=Y.min(),ymax=Y.max())
-    # ax.set_xlim(xmin=X.min(),xmax=X.max())
+    ax.set_xlim(xmin=X.min(),xmax=X.max())
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
@@ -161,5 +160,3 @@ ani = animation.FuncAnimation(fig, update, frames=len(T), init_func=init, blit=T
 # ani.save("animation.mp4", writer=writer)
 
 plt.show()
-print("Done.")
-
