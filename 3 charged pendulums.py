@@ -3,14 +3,16 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from math import *
 from matplotlib.animation import FFMpegWriter
+from tqdm import tqdm
+import sys
 
 d = 3 # dist. between 
 L = 1 # Assuming L is the length of rod of each pendulum
 k = 1 # 1/4πɛ₀
 g = 10 # grav const. NOTE: g > 0
 m = np.array([1,1,1]) # masses
-Q = 0*np.array([1,1,1]) # charges
-theta = np.array([pi/2,0,0]) # angles (θᵢ)
+Q = 5*np.array([1,1,1]) # charges
+theta = np.array([pi/2,0,-pi/2]) # angles (θᵢ)
 omega = np.array([0,0,0]) # angular (ωᵢ)
 dt = 0.001 # time step
 t = 0 # initial time - editing this does not "skip" time
@@ -19,8 +21,6 @@ T = 10 # end time (T/FPS)
 frames = int(T/dt)
 print(f"Steps: {frames}")
 FPS = 30
-
-# C = lambda i,j: d*(j-i) # technically we should have (j+1) - (i-1), but this cancels down to j-i
 
 fa = lambda y: y
 def fb(theta):
@@ -32,12 +32,12 @@ def fb(theta):
                 f = L*( sin(theta[j]) - sin(theta[i])) + d*(j-i)
                 df = -L*cos(theta[i])
 
-                g = L*( cos(theta[i]) - cos(theta[j]) )
-                dg = -L*sin(theta[i])
+                h = L*( cos(theta[i]) - cos(theta[j]) ) # GOOFY AHHH LINE
+                dh = -L*sin(theta[i])
 
-                r2 = f**2 + g**2
+                r2 = f**2 + h**2
                 rn32 = r2**(-3/2)
-                d1r = (-1/2)*( 2*f*df + 2*g*dg )*rn32
+                d1r = (-1/2)*( 2*f*df + 2*h*dh )*rn32
 
                 A += k*Q[i]*Q[j]*d1r
                 # _ = j used for debug
@@ -67,7 +67,7 @@ def RK4(xn,yn,t,dt=dt):
 def normalize_angle(theta):
     return (theta + np.pi) % (2 * np.pi) - np.pi  # Keeps within (-π, π]
 
-print("Processing...")
+pbar = tqdm(total=int(T/dt), desc="Processing")
 
 # Loop n -> N
 M = [[theta, omega, t]] 
@@ -75,9 +75,10 @@ while t < T - dt:
     theta, omega, t = RK4(theta, omega, t)  # Use the previous state for the RK4 step
     theta = normalize_angle(theta)  # Normalize the angle if needed
     M.append([theta, omega, t])  # Store the updated values
+    pbar.update(1)
 
-
-
+pbar.close()
+sys.stdout.flush()
 
 
 
@@ -160,3 +161,4 @@ ani = animation.FuncAnimation(fig, update, frames=len(T), init_func=init, blit=T
 # ani.save("animation.mp4", writer=writer)
 
 plt.show()
+# print("Done.")
