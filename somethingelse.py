@@ -78,7 +78,7 @@ def wigner_function_point(args):
         psi2 = np.conj(ground_state_array[i2, j2])
         return np.exp(2j * (p1 * xi1 + p2 * xi2) / hbar) * psi1 * psi2
 
-    integral, _ = nquad(lambda xi1, xi2: integrand(xi1, xi2).real, [[-5, 5], [-5, 5]])
+    integral, _ = nquad(lambda xi1, xi2: integrand(xi1, xi2).real, [[-4, 4], [-4, 4]])
 
 
     return (theta1, p1, theta2, p2, (1 / (np.pi**2 * hbar**2)) * integral)
@@ -115,6 +115,8 @@ def compute_wigner_parallel(eigenvectors):
 
 # Ensure this block runs only in the main script
 if __name__ == "__main__":
+    """
+
     os.environ['OMP_NUM_THREADS'] = '1'  # Prevents multi-threading issues
 
     with Manager() as manager:
@@ -125,6 +127,29 @@ if __name__ == "__main__":
 
         # Step 3: Compute Wigner function in parallel
         wigner_vals = compute_wigner_parallel(eigenvectors)
+    """
+
+    os.environ['OMP_NUM_THREADS'] = '1'  # Prevents multi-threading issues
+
+    start_total = time.time()  # Start total timer
+
+    with Manager() as manager:
+        shared_dict = manager.dict()  # Create shared memory object
+
+        print("Diagonalizing Hamiltonian...")
+        start = time.time()
+        eigenvalues, eigenvectors = diagonalize_hamiltonian(N)  # Get eigenvalues & eigenvectors
+        end = time.time()
+        print(f"Hamiltonian diagonalized in {end - start:.2f} seconds")
+
+        print("Computing Wigner function in parallel...")
+        start = time.time()
+        wigner_vals = compute_wigner_parallel(eigenvectors)
+        end = time.time()
+        print(f"Wigner function computed in {end - start:.2f} seconds")
+
+    end_total = time.time()
+    print(f"Total execution time: {end_total - start_total:.2f} seconds")
 
     # Select fixed p2 values and plot Wigner function for different theta2
     fig, axes = plt.subplots(2, 2, figsize=(12,10))
